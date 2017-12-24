@@ -1,3 +1,5 @@
+This OS project is the collabarated work of Ankit Dewan and Shashank Gururaj Rao.
+
 We have implemented the 60 point project with Preemptive multi-tasking.
 
 In the Fork implementation, we have used Copy-On-Write(COW) to save physical pages.
