@@ -27,13 +27,11 @@ file create_file_structure(char* name, uint64_t inode_no, uint64_t typeflag, uin
 uint64_t get_parent_inode_no(char* file_name) {
 	char file_path[100], temp[100];
 	strcpy(file_path, file_name);
-//	kprintf("%s", file_path);
 	char* files[100];
 	uint64_t num_files = strtok(file_path, '/', files);
 	uint64_t i = 0;
 	strcpy(temp, "/");
-//	kprintf("%d", num_files);
-//		while(1){};
+
 	while(i < num_files-1) {
 		strcat(temp, files[i]);
 		strcat(temp, "/");
@@ -87,12 +85,8 @@ void init_tarfs() {
 uint64_t get_file_start_address(char* fileName) {
 	int i = 3;
 	while((strcmp(fileName,fd[i].name)) != 0){
-//		kprintf("Not same %s %s \n",fileName,fd[i].name );
 		i++;
 	}
-//	kprintf("hello\n");
-//	kprintf("%s\n",((Elf64_Ehdr*)tarfs_main[i].file_address_header)[2] );
-//	kprintf("Same found %s %s \n",fileName,fd[i].name );
 	return fd[i].file_address_start;
 }
 
@@ -105,40 +99,32 @@ void kfree(uint64_t vAddress, uint64_t* PML4)
 	int PDTEOffset = getPDTEOffset((uint64_t)vAddress);
 	int PDTOffset = getPDTOffset((uint64_t)vAddress);
 	int PTOffset = getPageTableOffset((uint64_t)vAddress);
-//	kprintf("the value of address : %p\n",vAddress);
-//	kprintf("%d %d %d %d\n",PML4Offset,PDTEOffset, PDTOffset ,PTOffset);
 /*---------------------------------------------------------------------------------------*/
 	uint64_t PDTE_val = (uint64_t)PML4[PML4Offset];
 	uint64_t* PDTE;
 	if((PDTE_val & PG_P)==0){
-//		kprintf("Page fault\n");
 		return;
 	}
 	else{
 		PDTE = (uint64_t*)((PDTE_val& ~(0xFFF)) | 0xffffffff80000000);
-//		kprintf("PML4 wrks fine\n");
 	}
 /*---------------------------------------------------------------------------------------*/
 	uint64_t* PDT ;
 	uint64_t PDT_val = (uint64_t)PDTE[PDTEOffset] ;
 	if((PDT_val & PG_P)==0){
-//		kprintf("Page fault\n");
 		return;
 	}
 	else{
 		PDT = (uint64_t*)((PDT_val& ~(0xFFF)) | 0xffffffff80000000);
-//		kprintf("PDTE wrks fine\n");
 	}
 /*---------------------------------------------------------------------------------------*/
 	uint64_t* PT;
 	uint64_t PT_val = (uint64_t)PDT[PDTOffset];
 	if((PT_val & PG_P)==0){
-//		kprintf("Page fault\n");
 		return;
 	}
 	else{
 		PT = (uint64_t*)((PT_val& ~(0xFFF)) | 0xffffffff80000000);
-//		kprintf("PDT wrks fine\n");
 	}
 /*---------------------------------------------------------------------------------------*/
 	uint64_t address = PT[PTOffset];
@@ -152,9 +138,7 @@ void kfree(uint64_t vAddress, uint64_t* PML4)
 			PT[PTOffset] = 0x0;
 	}
 	uint64_t oldCr3 = 0;
-	/*__asm__ __volatile__("movq %%cr3, %0"::"r"(oldCr3));
-	__asm__ __volatile__("movq %0, %%cr3":"=r"(PML4):);
-	__asm__ __volatile__("movq %%cr3, %0"::"r"(oldCr3));*/
+
 	__asm__ __volatile__ ("movq %%cr3, %0":"=r"(oldCr3):);
 	__asm__ __volatile__ ("movq %0, %%cr3"::"r"((uint64_t)PML4 & 0xfffffff));
 	__asm__ __volatile__ ("movq %0, %%cr3"::"r"(oldCr3));
@@ -183,45 +167,37 @@ PCB* execve(PCB* pcb, char* s, char * argv[], char * envp[])
 {
 	char** tokenArrays = (char**)kmalloc();
 	if(tokenArrays){}
-//	pcb->state = READY;
 	char * temp = (char *)kmalloc();
 	strcpy(temp, s);
 	int n = strtok(temp,'/',tokenArrays);
 	strcpy(pcb->p_name,tokenArrays[n-1]);
-//	kprintf("%s",tokenArrays[n-1]);
+
 	kfree((uint64_t)tokenArrays,(uint64_t*)(current_PCB->virtualPML4));
 	kfree((uint64_t)temp,(uint64_t*)(current_PCB->virtualPML4));
-//	strcpy(pcb->p_name, tokenArray[n-1]);
-//	kfree((uint64_t)tokenArray, (uint64_t*)(current_PCB->virtualPML4));
-//	kprintf("in execve");
+
 	uint64_t fileStartAddress = get_file_start_address(s);
 	Elf64_Ehdr* elf64_ehdr = (Elf64_Ehdr*)fileStartAddress;
 	char TEMP_ENVP[10][30];
 	int w = 0;
-//	if(envp){
-//		int w = 0;
-		while(envp[w] != 0) {
-			strcpy(TEMP_ENVP[w], envp[w]);
-			w++;
-		}
-//	}
+	while(envp[w] != 0) {
+		strcpy(TEMP_ENVP[w], envp[w]);
+		w++;
+	}
+
 	int z = 0;
 	char TEMP_ARGV[10][30];
 	int TEMP_ARGC = 0;
-//	if(argv){
-//		int z = 1;
-		while(argv[z] != 0) {
-			strcpy(TEMP_ARGV[z], argv[z]);
-			z++;
-		}
+	
+	while(argv[z] != 0) {
+		strcpy(TEMP_ARGV[z], argv[z]);
+		z++;
+	}
 
-		TEMP_ARGC = z;
-//	}
+	TEMP_ARGC = z;
 	deleteVMAentries(pcb);
 	__asm__  __volatile__ ("movq %0, %%cr3"::"r"((uint64_t)(pcb->PML4)));
 	char* e_ident = (char*)&(elf64_ehdr->e_ident);
 	if(*(e_ident) == '\x7F' && *(e_ident+1) == 'E' && *(e_ident+2) == 'L' && *(e_ident+3) == 'F' ) {
-//		kprintf("in elf");
 
 		Elf64_Phdr * elf64_phdr = (Elf64_Phdr * )((uint64_t)elf64_ehdr + elf64_ehdr->e_phoff);
 		int numberOfProgHeaders = elf64_ehdr->e_phnum;
@@ -241,34 +217,26 @@ PCB* execve(PCB* pcb, char* s, char * argv[], char * envp[])
 				else if(elf64_phdr->p_flags == READWRITE){
 					type = DATA;
 				}
-//				uint64_t retAd = kmalloc();
-//				virtualToPhysical(retAd, (uint64_t*)(pcb->virtualPML4));
-//				if(retAd){}
-//				while(1){}
+
 				createAndInsertVMA(pcb, elf64_phdr->p_vaddr, elf64_phdr->p_vaddr + elf64_phdr->p_memsz,elf64_phdr->p_flags, type);
-//				uint64_t virtualPML4 = pcb->virtualPML4;
-//				kprintf("virtualPML4 %p\n",virtualPML4);
+
 				cr3 = (uint64_t*)(pcb->PML4);
 
 //				handled by page fault handler
 				memcpy((char*)((uint64_t)elf64_ehdr + (uint64_t)(elf64_phdr->p_offset)),(char*) startAddr, elf64_phdr->p_filesz);
 				memset((char*)(startAddr+elf64_phdr->p_filesz), 0, size -  elf64_phdr->p_filesz);
-//				kprintf("copied");
-//				kprintf("loaded code\n");
-
-
 			}
 			elf64_phdr+=1;
 			i=i+1;
 		}
-//		while(1){}
-//		creating user stack
+
 		uint64_t stackVirtualAddressStart = (uint64_t)(0x10000000ull);
 		uint64_t stackVirtualAddressEnd = (uint64_t)(0x10000000ull + 0x10000ull);
 		uint64_t type = STACK;
 		uint64_t flags  = READWRITE;
 		createAndInsertVMA(pcb, stackVirtualAddressStart, stackVirtualAddressEnd,flags, type);
 		pcb->rsp = (stackVirtualAddressEnd - 0x20);
+		
 //		creating user heap
 		uint64_t heapVirtualAddressStart = (uint64_t)(0x80000000ull);
 		uint64_t heapVirtualAddressEnd = (uint64_t)(0x80000000ull + 0x10000ull);
@@ -278,8 +246,6 @@ PCB* execve(PCB* pcb, char* s, char * argv[], char * envp[])
 		(pcb->heap_mem) = heapVirtualAddressStart;
 		pcb->heap_ptr = (uint64_t*)(pcb->heap_mem);
 
-
-//		walkVMA(pcb);
 		pcb->stack = (uint64_t*)kmalloc();
 
 		pcb->rip = elf64_ehdr->e_entry;
@@ -287,7 +253,6 @@ PCB* execve(PCB* pcb, char* s, char * argv[], char * envp[])
 		__asm__ __volatile__ ("movq %%cr3, %0":"=r"(oldCr3):);
 		__asm__ __volatile__ ("movq %0, %%cr3"::"r"((uint64_t)(pcb->PML4) & 0xfffffff));
 		if(oldCr3){}
-
 
 		int ARGC = TEMP_ARGC;
 
@@ -326,11 +291,9 @@ PCB* execve(PCB* pcb, char* s, char * argv[], char * envp[])
 PCB* loadExecutable(char* s) {
 	clear_screen();
 	scanLock = 0;
-//	kprintf("In load");
 	uint64_t fileStartAddress = get_file_start_address(s);
 	Elf64_Ehdr* elf64_ehdr = (Elf64_Ehdr*)fileStartAddress;
-//	doHandlePageFault = 1;
-	//kprintf("the value is %s\n", header->e_ident);
+
 	char* e_ident = (char*)&(elf64_ehdr->e_ident);
 	if(e_ident[0] == '\x7F' && (str_contains_substr2(e_ident, "ELF", 1, 3) == 1)) {
 		PCB* pcb = createProcess();
@@ -354,39 +317,17 @@ PCB* loadExecutable(char* s) {
 					type = DATA;
 				}
 				createAndInsertVMA(pcb, elf64_phdr->p_vaddr, elf64_phdr->p_vaddr + elf64_phdr->p_memsz,elf64_phdr->p_flags, type);
-//				kprintf("Ypo\n");
-				//*(uint64_t*)(0x500000000)=100;
-//				virtualToPhysical(pcb->virtualPML4);
-//				kprintf("pcb->virtualPML4 %p\n", pcb->virtualPML4);
-//				uint64_t virtualPML4 = pcb->virtualPML4;
-//				kprintf("virtualPML4 %p\n",virtualPML4);
-				cr3 = (uint64_t*)(pcb->PML4);
-//				kprintf("cr3 value is %p\n",);
-//				kprintf("Ypo\n");
-//				kprintf("the value of vaddr was %p\n",(elf64_phdr->p_vaddr));
-//				kprintf("elf64_phdr->p_filesz is %p\n", elf64_phdr->p_filesz);
-//				uint64_t addr = (elf64_phdr->p_vaddr);
-//				uint64_t size2 = 0;
 
-				/*while(size<elf64_phdr->p_filesz){
-					kprintf("setting value\n");
-					kprintf("vaddr %p\n", virtual_PML4);
-					*(uint64_t*)(addr) = 0x0;
-//					userPhysicalToVirtual(tempPage & 0xfffffff,addr,virtual_PML4);
-					addr+=0x1000;
-					size2+=0x1000;
-				}*/
-//				kprintf("out\n");
+				cr3 = (uint64_t*)(pcb->PML4);
+
 //				handled by page fault handler
 				memcpy((char *)((uint64_t )elf64_ehdr +  (uint64_t)(elf64_phdr->p_offset) ),(char*) startAddr,  elf64_phdr-> p_filesz);
 				memset((char*)(startAddr+ elf64_phdr->p_filesz), 0, size -  elf64_phdr-> p_filesz);
-//				kprintf("after memcopy\n");
-//				kprintf("YO %p\n",*(uint64_t*)(elf64_phdr->p_vaddr));
 			}
 			elf64_phdr+=1;
 			i=i+1;
-//			kprintf("The value of i is %x",i);
 		}
+		
 //		creating user stack
 		uint64_t stackVirtualAddressStart = (uint64_t)(0x10000000ull);
 		uint64_t stackVirtualAddressEnd = (uint64_t)(0x10000000ull + 0x10000ull);
@@ -396,6 +337,7 @@ PCB* loadExecutable(char* s) {
 		pcb->rsp = (stackVirtualAddressEnd - 0x20);
 		pcb->time_slice = 100;
 		pcb->time_slice_left = pcb->time_slice;
+		
 //		creating user heap
 		uint64_t heapVirtualAddressStart = (uint64_t)(0x80000000ull);
 		uint64_t heapVirtualAddressEnd = (uint64_t)(0x80000000ull + 0x10000ull);
@@ -405,15 +347,10 @@ PCB* loadExecutable(char* s) {
 		(pcb->heap_mem) = heapVirtualAddressStart;
 		pcb->heap_ptr = (uint64_t*)(pcb->heap_mem);
 
-
-//		walkVMA(pcb);
 		pcb->stack = (uint64_t*)kmalloc();
-		//kprintf("pcb mem%p\n",pcb->mem);
-		//		doHandlePageFault = 0;
-		//		kprintf("returning i");
+
 		pcb->rip = elf64_ehdr->e_entry;
-		//		kprintf("\npcb->rip is %p",pcb->rip);
-				//while(1){}
+
 		uint64_t oldCr3 = 0;
 		__asm__ __volatile__ ("movq %%cr3, %0":"=r"(oldCr3):);
 		__asm__ __volatile__ ("movq %0, %%cr3"::"r"((uint64_t)(pcb->PML4) & 0xfffffff));
@@ -441,23 +378,6 @@ PCB* loadExecutable(char* s) {
 		*(uint64_t*)(pcb->rsp+8) = (uint64_t)ARGV;
 		*(uint64_t*)(pcb->rsp+16) = (uint64_t)E;
 
-		//		(char*) a = "2";
-		//		__asm__ volatile("pushq %0"::"r"((char*)a[0]));
-
-
-		/*		a[2] = (char*)malloc(sizeof(char) * 10);
-				strcpy(a[1],"First");
-		//		__asm__ __volatile("pushq %0"::"r"((char*)a[1]));
-				kprintf("%s",a[1]);
-				strcpy(a[2],"Second");
-		//		__asm__ __volatile("pushq %0"::"r"((char*)a[2]));
-				kprintf("%s",a[2]);
-
-		//		__asm__ __volatile__("movq %0, %%rsp"::"r"((uint64_t)a));
-
-				kprintf("the address would habebeen %p\n\n\n\n\n\n\n",pcb->rsp+8);*/
-//		__asm__ __volatile__ ("movq %0, %%cr3"::"r"(oldCr3));
-//		*(uint64_t*)(pcb->rsp+8) = (uint64_t)a;//		(char**)(pcb->rsp+16) = a;
 		return pcb;
 	}
 	else{
@@ -479,16 +399,12 @@ uint64_t get_absolute_path(char* file_path, uint64_t current_inode_no, uint64_t 
 	strcpy(cwd.name, fd[current_inode_no].name);
 
 	char* temp = (char*)kmalloc();
-//	kprintf("\nin get begin: %s", &file_path[0]);
-//	while(1){}
-//	char temp[100];
+
 	char path[100];
 	strcpy(path, file_path);
 	char* files[100];
 	uint64_t num_files = strtok(path, '/', files);
-//	file_p cwd = current_PCB->current_working_dir;
-//	kprintf("\nin get begin inode: %d", inode);
-//	strcpy(temp, strcat(temp, "/"));
+
 	uint64_t inode = cwd.inode_no;
 	uint64_t parent_inode = cwd.parent_inode_no;
 	if(mode == 1) {
@@ -547,7 +463,6 @@ uint64_t get_absolute_path(char* file_path, uint64_t current_inode_no, uint64_t 
 		}
 		k++;
 	}
-//	kprintf("\nin get end: %s", &temp[0]);
 	int j = 3;
 	uint64_t flag_inode = 0x9999ull;
 	while(strlen(fd[j].name) != 0) {
@@ -560,23 +475,18 @@ uint64_t get_absolute_path(char* file_path, uint64_t current_inode_no, uint64_t 
 		strcpy(temp, "Nooo");
 	}
 	kfree((uint64_t)temp,(uint64_t*)(current_PCB->virtualPML4));
-//	return &temp[0];
-//	kprintf("in get: %s", &temp[0]);
+
 	return flag_inode;
 }
 
 uint64_t open(char* file_path) {
 	uint64_t cwd = current_PCB->curr_inode_no;
-//	kprintf("\n in kernel: %s %d", file_path, cwd);
 	uint64_t curr_inode_no = get_absolute_path(&file_path[0], cwd, 1);
-//	kprintf("\n in kernel: %d", curr_inode_no);
 	if(curr_inode_no == 0x9999ull) {
 		return FILE_ERROR;
 	}
-//	strcpy(current_PCB->pcb_fd[curr_inode_no].name, fd[curr_inode_no].name);
-//	current_PCB->pcb_fd[curr_inode_no].typeflag = fd[curr_inode_no].typeflag;
+
 	current_PCB->pcb_fd[curr_inode_no].inode_no = fd[curr_inode_no].inode_no;
-//	current_PCB->pcb_fd[curr_inode_no].parent_inode_no = fd[curr_inode_no].parent_inode_no;
 	current_PCB->pcb_fd[curr_inode_no].read_offset = 0x0ull;
 	if(fd[curr_inode_no].typeflag == TYPE_DIRECTORY) {
 		current_PCB->pcb_fd[curr_inode_no].open_flag = 1;
@@ -630,9 +540,7 @@ uint64_t read_file(uint64_t inode_no, uint64_t size) {
 		strcpy(buffer, "File is not open");
 		return ((uint64_t)(&buffer[0]));
 	}
-//	kprintf("\n%x %x %x\n", fd[inode_no].file_address_start, current_PCB->pcb_fd[inode_no].read_offset, fd[inode_no].file_address_end);
 	if((fd[inode_no].file_address_start)+(current_PCB->pcb_fd[inode_no].read_offset) > (fd[inode_no].file_address_end)) {
-//		kprintf("\nShould not be in here...tarfs structure wrongly created");
 		strcpy(buffer, "");
 		return ((uint64_t)(&buffer[0]));
 	}
@@ -642,11 +550,7 @@ uint64_t read_file(uint64_t inode_no, uint64_t size) {
 		buffer[i] = file_ptr[i];
 		i++;
 	}
-//	kprintf("hi\n");
 	current_PCB->pcb_fd[inode_no].read_offset = (uint64_t)&file_ptr[i] - (fd[inode_no].file_address_start);
-//	kprintf("\n%x \n", current_PCB->pcb_fd[inode_no].read_offset);
-//	uint64_t file_ptr = fd_temp.file_address_start;
-//	buffer = (char*) file_ptr;
 	return ((uint64_t)(&buffer[0]));
 }
 
@@ -665,9 +569,7 @@ uint64_t read_file_per_line(uint64_t inode_no) {
 		strcpy(buffer, "File is not open");
 		return ((uint64_t)(&buffer[0]));
 	}
-//	kprintf("\n%x %x %x\n", fd[inode_no].file_address_start, current_PCB->pcb_fd[inode_no].read_offset, fd[inode_no].file_address_end);
 	if((fd[inode_no].file_address_start)+(current_PCB->pcb_fd[inode_no].read_offset) > (fd[inode_no].file_address_end)) {
-//		kprintf("\nShould not be in here...tarfs structure wrongly created");
 		strcpy(buffer, "");
 		return ((uint64_t)(&buffer[0]));
 	}
@@ -677,17 +579,11 @@ uint64_t read_file_per_line(uint64_t inode_no) {
 		buffer[i] = file_ptr[i];
 		i++;
 	}
-//	kprintf("%s\n", buffer);
 	current_PCB->pcb_fd[inode_no].read_offset = (uint64_t)&file_ptr[i+1] - (fd[inode_no].file_address_start);
-//	kprintf("\n%x \n", current_PCB->pcb_fd[inode_no].read_offset);
-//	uint64_t file_ptr = fd_temp.file_address_start;
-//	buffer = (char*) file_ptr;
 	return ((uint64_t)(&buffer[0]));
 }
 
 uint64_t cat(uint64_t inode_no, char* buffer) {
-//	char* buffer = (char*) kmalloc();
-//	kprintf("inode %d\n", inode_no);
 	if((inode_no < 3) || (strlen(fd[inode_no].name) == 0)) {
 		strcpy(buffer, "No such file or directory");
 		return FILE_NOT_READ;
@@ -702,21 +598,16 @@ uint64_t cat(uint64_t inode_no, char* buffer) {
 	}
 
 	if((fd[inode_no].file_address_start)+(current_PCB->pcb_fd[inode_no].read_offset) >= (fd[inode_no].file_address_end)) {
-//		kprintf("\nShould not be in here...tarfs structure wrongly created");
 		strcpy(buffer, "");
 		return FILE_READ_COMPLETELY;
 	}
 	char* file_ptr = (char*)((fd[inode_no].file_address_start) + (uint64_t)(current_PCB->pcb_fd[inode_no].read_offset));
 	int i = 0;
-	while(i < BUFFER_SIZE/* && file_ptr[i]!='\0'*/) {
+	while(i < BUFFER_SIZE) {
 		buffer[i] = file_ptr[i];
 		i++;
 	}
-//	kprintf("hi\n");
 	current_PCB->pcb_fd[inode_no].read_offset = (uint64_t)&file_ptr[i] - (fd[inode_no].file_address_start);
-//	kprintf("\n%x \n", current_PCB->pcb_fd[inode_no].read_offset);
-//	uint64_t file_ptr = fd_temp.file_address_start;
-//	buffer = (char*) file_ptr;
 	return FILE_PARTIALLY_READ;
 }
 
@@ -755,7 +646,6 @@ uint64_t close(uint64_t inode_no) {
 uint64_t get_current_working_dir() {
 	char* buffer = (char*) kmalloc();
 	strcpy(buffer, fd[current_PCB->curr_inode_no].name);
-//	kprintf("\nin kern: %s", buffer);
 	return ((uint64_t)buffer);
 }
 
@@ -765,12 +655,10 @@ uint64_t change_directory(char* path) {
 	if((strcmp(path, "/") == 0) || (strcmp(path, "~") == 0)) {
 		current_PCB->curr_inode_no = 3;
 		strcpy(buffer, fd[current_PCB->curr_inode_no].name);
-//		kprintf("nooo %s", path);
 		return ((uint64_t)&buffer[0]);
 	}
 	uint64_t temp_cwd = current_PCB->curr_inode_no;
 	uint64_t curr_inode_no = get_absolute_path(&path[0], temp_cwd, 0);
-//	kprintf("\nIn kernel %d", curr_inode_no);
 	if(curr_inode_no == 0x9999ull) {
 		strcpy(buffer, "No such file or directory");
 		return ((uint64_t)&buffer[0]);
@@ -781,6 +669,5 @@ uint64_t change_directory(char* path) {
 	}
 	current_PCB->curr_inode_no = curr_inode_no;
 	strcpy(buffer, fd[current_PCB->curr_inode_no].name);
-//	strcpy(buffer, current_PCB->current_working_dir.name);
 	return ((uint64_t)&buffer[0]);
 }
