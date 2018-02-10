@@ -7,19 +7,7 @@
 #include "stdlib.h"
 
 void exit(int status){
-/*      long syscall_nbr = 60;
-        long exit_status = 42;
-         __asm__ __volatile__ ( "movq %0, %%rax\n\t"
-                                "movq %1, %%rdi\n\t"
-                                "syscall"
-                                :
-                                : "m" (syscall_nbr), "m" (exit_status)
-                                : "rax", "rdi");*/
-//        __asm__ __volatile__ ("int $0x80" : : "a" (0x01), "b" (status) : "memory");
-//	printf("\nExecuting Exit");
 	__asm__ __volatile__ ("int $0x80" : : "a" (SYS_EXIT): "memory");
-
-//      __asm__ __volatile__ ( "int $0x80" :  :"a" (0), "b"(status): "memory");
 }
 
 void *malloc(size_t size) {
@@ -46,7 +34,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 		}
 		i++;
 	}
-//	printf("\nAmpersand flag = %d", amp_flag);
 
 	if(strcmp(tokens[0], "pwd") == 0) {
 		getcwd(&temp[0]);
@@ -54,8 +41,7 @@ void shebang(char* command, char* temp, char *envp[]) {
 	}
 	else if(strcmp(tokens[0], "cd") == 0) {
 		if(tokens[1] == 0) {
-//				strcpy(&(*tokens[1]), "/");
-			char* t2 = /*(char*)*/ malloc(5);
+			char* t2 = malloc(5);
 			strcpy(t2, "/");
 			chdir(&t2[0], &temp[0]);
 			if(temp[0] != '/') {
@@ -108,9 +94,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 			if(amp_flag == 0) {
 				wait_pid(pid);
 			}
-			else {
-//				yield();
-			}
 		}
 	}
 	else if(strcmp(tokens[0], "cat") == 0) {
@@ -126,9 +109,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 			if(amp_flag == 0) {
 				wait_pid(pid);
 			}
-			else {
-//				yield();
-			}
 		}
 	}
 	else if(strcmp(tokens[0], "echo") == 0) {
@@ -139,9 +119,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 		else{
 			if(amp_flag == 0) {
 				wait_pid(pid);
-			}
-			else {
-//				yield();
 			}
 		}
 	}
@@ -163,9 +140,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 			if(amp_flag == 0) {
 				wait_pid(pid);
 			}
-			else {
-//				yield();
-			}
 		}
 	}
 	else if(strcmp(tokens[0], "sleep") == 0) {
@@ -186,9 +160,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 			if(pid == 0){
 				execvpe("/bin/preemptiveTest1", tokens, envp);
 			}
-			else{
-//				yield();
-		}
 	}
 	else if(strcmp(tokens[0], "test2") == 0){
 			uint64_t pid = fork();
@@ -218,9 +189,6 @@ void shebang(char* command, char* temp, char *envp[]) {
 
 			int flag = 0;
 
-	//		char* temp = malloc(100);
-	//		char* temp_buf = malloc(100);
-
 			read_line(fd, temp);
 			if(strcmp(temp, "Is a directory") == 0) {
 				printf("\nIs a directory");
@@ -230,11 +198,7 @@ void shebang(char* command, char* temp, char *envp[]) {
 				flag = 3;
 				char* temp2 = malloc(100);
 				while(flag == 3) {
-		//			flag = 0;
-	//				char* temp_buf2 = malloc(BUFFER_SIZE);
 					read_line(fd, &temp[0]);
-	//				printf("%s", temp);
-	//				printf("%s", temp_buf2);
 					if(strlen(temp) == 0) {
 						flag = 0;
 						continue;
