@@ -65,9 +65,6 @@ uint64_t* allocatePage2(){
 		}
 		mmapUnSetBit(count*64 + count2);
 		uint64_t page = (uint64_t)(count*64ull + count2)*0x1000ul;
-		//physicalToVirtual((uint64_t)page, (uint64_t)page, cr3);
-		//updatePageEntriesToZero((uint64_t)page);
-		//updatePageEntriesToZero((uint64_t)(count*64ull + count2)*0x1000ul);
 		return (uint64_t*)page;
 	}
 	kprintf("CANNOT ALLOCATE ANY MORE PAGES!");
