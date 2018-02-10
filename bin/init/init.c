@@ -15,19 +15,6 @@ int  main(int argc, char *argv[], char *envp[])
 		}
 		else{
 			wait_pid(pid);
-//			printf("back here");
 		}
 	}
-/*	int pid = fork();
-	printf("\nExecuting init");
-
-	if(pid==0){
-		execvpe("/bin/sbush",argv,envp);
-	}
-	else{
-		while(1){
-//			printf("back in init\n");
-			yield();
-		}
-	}*/
 }
