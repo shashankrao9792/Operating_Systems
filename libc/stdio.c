@@ -10,11 +10,8 @@ char* octalconvert(long unsigned n, char* str) {
 	*ptr = '\0';
 	while(n>0) {
 		int k = n & 7;
-		//int rem = k%10;
-		//int needed = k/10;
 		char q;
 		q = '0'+k;
-		//printf("%c\n",q);
 		ptr--;
 		*ptr = q;
 		n = n >> 3;
@@ -38,7 +35,6 @@ char* printPointer(long unsigned int n, char* str) {
 		else {
 			q = '0' + rem;
 		}
-		//printf("%c\n",q);
 		ptr--;
 		*ptr = q;
 		n = n >> 4;
@@ -65,15 +61,10 @@ char* hexaconvert(long unsigned n, char* str) {
 		else {
 			q = '0' + rem;
 		}
-		//printf("%c\n",q);
 		ptr--;
 		*ptr = q;
 		n = n >> 4;
 	}
-//	ptr--;
-//	*ptr = 'x';
-//	ptr--;
-//	*ptr = '0';
 	str = ptr;
 	return str;
 }
@@ -93,7 +84,6 @@ char* addressconvert(unsigned long int n, char* str) {
 			else {
 					q = '0' + rem;
 			}
-			//printf("%c\n",q);
 			ptr--;
 			*ptr = q;
 			n = n >> 4;
@@ -196,7 +186,6 @@ void printf(char *fmt, ...) {
 	string[count++] = '\0';
 	va_end(arg);
 
-//	uint64_t length = (uint64_t) strlen(string);
 	syscall_args_2(SYS_WRITE, STDOUT, (long)string);
 }
 
@@ -206,7 +195,6 @@ void clrscr() {
 
 void scanf(char * t, uint64_t addr){
 	syscall_args_2(SYS_READ, STDIN, addr);
-//	__asm__ __volatile__("int $0x80"::"a"(0x03), "b"(0x0),"c"(addr));
 }
 
 char *gets(char *s) {
