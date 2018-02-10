@@ -7,29 +7,18 @@
 
 int main(int argc, char *argV[], char *envp[])
 {
-//	printf("in ls\n");
-//	printf("%s",argV[0]);
-//	while(1){}
-//	printf("yielding");
-//	yield();
 	char* filepath = /*(char*)*/malloc(100);
 	int i = 1;
 	int fd = -1;
 	if(argV[i] == 0) {
 		getcwd(&filepath[0]);
-//		printf("\nafter pwd: %s", filepath);
-
-//		chdir(filepath, &temp[0]);
-
 		fd = openDirectory(&filepath[0], 0x0, FILE_PERM);
-//		printf("\nfd: %d", fd);
-
 		if(fd == FILE_ERROR) {
 			printf("\nNo such file or directory");
 			return -1;
 		}
-		char* p = /*(char*)*/malloc(500);
-		char* b = /*(char*)*/malloc(500);
+		char* p = malloc(500);
+		char* b = malloc(500);
 		readDirectory(fd, &p[0]);
 		strcpy2(b, p, '/');
 		printf("\n%s", b);
@@ -58,8 +47,5 @@ int main(int argc, char *argV[], char *envp[])
 			closeDirectory(fd);
 		}
 	}
-
-//	while(1){};
-
 	return 0;
 }
