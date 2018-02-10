@@ -3,11 +3,6 @@
 
 #include "sys/defs.h"
 #include "sys/process.h"
-//#include "string.h"
-//#include "util.h"
-//#include "sys/vmem.h"
-//#include "sys/kprintf.h"
-//#include "sys/elf64.h"
 
 uint64_t startPointerScan;
 uint64_t currentPointerScan;
@@ -69,7 +64,6 @@ typedef struct _file_structure {
 file fd[MAX_FILE];
 uint64_t STDINPTR;
 uint64_t STDOUTPTR;
-//uint64_t STDERR;
 
 uint64_t scanPointerStart ;
 uint64_t scanPointerCurrent;
@@ -81,7 +75,6 @@ PCB* loadExecutable(char * s);
 uint64_t read_directory(uint64_t inode_no);
 uint64_t open(char* file_path);
 uint64_t close(uint64_t inode_no);
-//uint64_t open_file(char* file_path);
 uint64_t read_file(uint64_t inode_no, uint64_t size);
 uint64_t cat(uint64_t inode_no, char* buffer);
 uint64_t write_file(uint64_t inode_no, char* buffer);
