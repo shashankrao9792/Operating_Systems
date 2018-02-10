@@ -19,7 +19,6 @@ extern void irq1();
 extern void pageFault();
 extern void syscalls();
 extern void divideByZero();
-//extern void int_syscall_stub();
 
 void init_idt()
 {
