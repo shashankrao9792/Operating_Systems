@@ -17,7 +17,6 @@
 extern volatile uint64_t changeScanValue;
 
 unsigned long timer_ticks = 0;
-//unsigned long seconds = 0;
 volatile int sleep_t = 0;
 extern volatile uint64_t breakSleep;
 
@@ -40,13 +39,11 @@ void timer_handler(registers_t r){
 		timerTicks++;
 		seconds = timerTicks/15;
 		current_PCB->time_slice_left -=1;
-//		kprintf("%d",seconds);
 
 		if(current_PCB->time_slice_left <=0)
 		{
 			syscall_yield();
 		}
-//		kprintf("in timer");
 	}
 	outb(0x20, 0x20);
 }
@@ -201,21 +198,4 @@ void sleep(int s, char* string) {
 	while((seconds - current_PCB->ticksLastRecorded)<current_PCB->sleepSeconds){
 		syscall_yield();
 	}
-//	uint64_t scanningAddressInSleep = scanPointerStart;
-
-	/*while(sleep_t != 0 && breakSleep != 1 && breakSleep != 2){
-		syscall_yield();
-	}*/
-//	changeScanValue = 1;
-//	kprintf("hello");
-/*	uint64_t endAddress = scanPointerCurrent;
-	scanPointerStart = scanPointerCurrent;
-//	*(char*(endAddress+1)) = '@';
-//	kprintf("%p  %p",scanningAddressInSleep,endAddress );
-	memcpy2((char*)scanningAddressInSleep,string,(int) (endAddress-scanningAddressInSleep));*/
-//	kprintf("%s\n",string);
-//	if(breakSleep == 2) {
-//		kprintf("Stopped    sleep %d", s);
-//	}
-//	breakSleep = 0;
 }
