@@ -13,13 +13,6 @@ void welcome_msg() {
 
 int  main(int argc, char *argv[], char *envp[])
 {	
-
-//	printf("\nargc %d", argc);
-//	printf("\nargv[0] %s", argv[0]);
-//	printf("\nenvp[0] %s", envp[0]);
-//
-//	while(1){}
-
 	clrscr();
 	welcome_msg();
 
