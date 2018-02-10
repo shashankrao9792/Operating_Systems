@@ -2,9 +2,8 @@
 #include "sys/kprintf.h"
 #include "sys/irq.h"
 #include "sys/syscall.h"
-//#include "sys/isr.h"
 
-void isr_handler(/*registers_t regs*/)
+void isr_handler()
 {
    kprintf("\nException!!");
 }
