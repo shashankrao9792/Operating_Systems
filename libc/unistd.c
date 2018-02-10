@@ -17,24 +17,16 @@ uint64_t close(uint64_t inode_no) {
 
 uint64_t read(uint64_t inode_no, char* buffer, uint64_t buf_size) {
 	uint64_t ret_val;
-//	char* c = (char*) malloc(1);
-	char* temp_buf = /*(char*)*/malloc(BUFFER_SIZE);
+	char* temp_buf = malloc(BUFFER_SIZE);
 	if(buf_size < BUFFER_SIZE) {
-//		printf("in first");
 		ret_val = syscall_args_3(SYS_READ, inode_no, (uint64_t)&temp_buf[0], buf_size);
 		strcpy(buffer, temp_buf);
-//		printf("%s", buffer);
-//		scanf("%s", (uint64_t)c);
 	}
 	else {
 		while(buf_size >= BUFFER_SIZE) {
-//			printf("in second");
 			ret_val = syscall_args_3(SYS_READ, inode_no, (uint64_t)&temp_buf[0], BUFFER_SIZE);
 			strcat(buffer, temp_buf);
-//			strcpy(buffer, temp_buf);
 			buf_size -= BUFFER_SIZE;
-//			printf("%s", buffer);
-//			scanf("%s", (uint64_t)c);
 		}
 		ret_val = syscall_args_3(SYS_READ, inode_no, (uint64_t)&temp_buf[0], buf_size);
 		strcat(buffer, temp_buf);
@@ -49,16 +41,13 @@ uint64_t read_line(uint64_t inode_no, char* buffer) {
 
 int read_from_terminal(char* filename, uint64_t num_bytes) {
 	uint64_t ret_val = 0;
-//	printf("\nfile: %s",filename);
-//	while(1){}
 	uint64_t fd = open(&filename[0], 0x0);
-//	printf("\nfile: %s",filename);
 	if(fd == FILE_ERROR) {
 		printf("\nNo such file");
 		return 0;
 	}
 
-	char* p = /*(char*)*/malloc(num_bytes);
+	char* p = malloc(num_bytes);
 	read(fd, &p[0], num_bytes);
 	printf("\nReading file '%s':\n", filename);
 	if(strlen(p) < 1760) {
@@ -66,7 +55,7 @@ int read_from_terminal(char* filename, uint64_t num_bytes) {
 	}
 	else {
 		int i = 0;
-		char c = '\0';/* = (char)malloc(1);*/
+		char c = '\0';
 		while(i < 1760) {
 			printf("%c", p[i++]);
 		}
@@ -101,7 +90,7 @@ int write_from_terminal(char* filename) {
 		printf("\nNo such file");
 		return -1;
 	}
-	char* s =/* (char*)*/malloc(500);
+	char* s = malloc(500);
 	printf("\nFile '%s' opened; Please type in string to write to file and press Enter:\n", filename);
 	scanf("%s", (uint64_t)s);
 	ret_val = write(fd, &s[0], strlen(s));
@@ -142,7 +131,6 @@ void yield() {
 }
 
 int execvpe(char *file, char * argv[], char * envp[]) {
-//	__asm__ __volatile__("int $0x80"::"a"(SYS_EXECV));
 	int ret_val = syscall_args_3(SYS_EXECV, (uint64_t)file, (uint64_t)argv, (uint64_t)envp);
 	return ret_val;
 }
