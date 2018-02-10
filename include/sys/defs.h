@@ -22,7 +22,7 @@ typedef uint64_t off_t;
 typedef uint32_t pid_t;
 
 #define BUFFER_SIZE	  200
-#define FILE_PERM	    0x0777
+#define FILE_PERM     0x0777
 
 #define STDIN		  0
 #define STDOUT		1
