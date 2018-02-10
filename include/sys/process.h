@@ -2,10 +2,8 @@
 #define __PROCESS_H
 
 #include "sys/defs.h"
-//#include "sys/tarfs.h"
 
 #define USER_VIRTUAL_ADDRESS 0x4000000000000
-
 
 typedef struct vma VMA;
 struct vma {
@@ -22,14 +20,9 @@ typedef struct mm_struct {
 } mm_struct;
 
 typedef struct __pcb_file_structure {
-//	char name[100];
-//	uint64_t size;
-//	uint64_t typeflag;
 	uint64_t inode_no;
-//	uint64_t parent_inode_no;
 	uint64_t read_offset;
 	uint8_t open_flag;
-//	uint64_t ref_open_count;
 } file_p;
 typedef struct _PCB  PCB;
 struct _PCB {
@@ -37,7 +30,6 @@ struct _PCB {
    uint64_t* stack;
    uint64_t* kernelStack;
    uint64_t kernelStackAddress;
-   //char* kern;
    uint64_t pid;
    uint64_t time_slice;
    uint64_t time_slice_left;
@@ -73,7 +65,6 @@ typedef struct _THREAD {
    uint64_t rbx;
    uint64_t rbp;
    uint64_t rsi;
-   //enum {RUNNIN, READY, SLEEPIN, ZOMBIE} state;
    int exit_status;
 } THREAD;
 
