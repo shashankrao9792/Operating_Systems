@@ -11,12 +11,8 @@
 #include "sys/irq.h"
 #include "sys/tarfs.h"
 #include "sys/syscall.h"
-//extern uint64_t STDINPTR;
-
-//extern file fd[];
 
 extern volatile uint64_t changeScanValue;
-//extern volatile uint64_t keyboardEnable;
 volatile int breakSleep = 0;
 
 extern int x;
@@ -62,11 +58,9 @@ void keyboard_handler(registers_t r)
     {
 		kprintf("\n");
 		*((char*)scanPointerCurrent++) = '\0';
-//                kprintf("%s",(char*)scanPointerStart);
 		changeScanValue = 1;
 		scanningAddress = scanPointerStart;
 		scanPointerStart = scanPointerCurrent;
-//                kprintf("%s")
 		ctrl_pressed = 1;
 		printSingleCharacter('M',ctrl_pressed);
 		ctrl_pressed = 0;
@@ -202,7 +196,6 @@ void keyboard_handler(registers_t r)
 					p = '>';
 			}
 		}
-//		if(keyboardEnable == 1) {
 			if(ctrl_pressed == 1 && p>0)
 			{
 					*video++ = '^';
@@ -212,16 +205,8 @@ void keyboard_handler(registers_t r)
 				*video++ = p;
 				*video++ = 0x07;
 				*((char*)scanPointerCurrent++) = p;
-//        		kprintf("%c",((char*)scanPointerStart)[0]);
 				printSingleCharacter(p,ctrl_pressed);
 			}
-//		}
-//		else if(keyboardEnable == 0 && ctrl_pressed == 1 && p == 'c') {
-//			breakSleep = 1;
-//		}
-//		else if(keyboardEnable == 0 && ctrl_pressed == 1 && p == 'z') {
-//			breakSleep = 2;
-//		}
 	}
 	outb(0x20, 0x20);
 }
